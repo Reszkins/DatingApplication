@@ -17,3 +17,12 @@ CREATE TABLE users_base_info
 	FOREIGN KEY(user_id)
 	  REFERENCES users_account(id)
 );
+
+CREATE TABLE users_description
+(
+  user_id INT,
+  description VARCHAR(1000),
+  CONSTRAINT fk_user_description
+	FOREIGN KEY(user_id)
+	  REFERENCES users_account(id)
+)

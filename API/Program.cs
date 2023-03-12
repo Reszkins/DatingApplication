@@ -43,6 +43,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddTransient<ISqlDataAccess,SqlDataAccess>();
 builder.Services.AddTransient<IAccountRepository,AccountRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ITokenGeneratorService, TokenGeneratorService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

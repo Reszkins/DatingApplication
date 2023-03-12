@@ -11,7 +11,8 @@ namespace API.Mapping
             var modelTypes = new List<Type>
             {
                 typeof(UserBaseInfo),
-                typeof(UserAccount)
+                typeof(UserAccount),
+                typeof(UserDescription)
             };
 
             foreach(var modelType in modelTypes)

@@ -19,7 +19,7 @@ namespace API.Services
             var tokenOptions = new JwtSecurityToken(
                 issuer: "http://localhost:8081",
                 audience: "http://localhost:8081",
-                claims: new List<Claim> { new Claim("email", email) },
+                claims: new List<Claim> { new Claim("userName", email) },
                 expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: signingCredentials
             );

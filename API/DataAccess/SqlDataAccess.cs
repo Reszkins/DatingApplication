@@ -8,6 +8,8 @@ namespace API.DataAccess
     {
         Task<List<T>> LoadData<T>(string sql, Dictionary<string, object> parameters);
         Task SaveData(string sql, Dictionary<string, object> parameters);
+        Task UpdateData(string sql, Dictionary<string, object> parameters);
+        Task DeleteData(string sql, Dictionary<string, object> parameters);
     }
     public class SqlDataAccess : ISqlDataAccess
     {
@@ -23,6 +25,21 @@ namespace API.DataAccess
         }
 
         public async Task SaveData(string sql, Dictionary<string, object> parameters)
+        {
+            await ExecuteSql(sql, parameters);
+        }
+
+        public async Task UpdateData(string sql, Dictionary<string, object> parameters)
+        {
+            await ExecuteSql(sql, parameters);
+        }
+
+        public async Task DeleteData(string sql, Dictionary<string, object> parameters)
+        {
+            await ExecuteSql(sql, parameters);
+        }
+
+        private async Task ExecuteSql(string sql, Dictionary<string, object> parameters)
         {
             string connectionString = "Host=postgresql_database;Username=admin;Password=admin;Database=ApplicationDatabase";
 

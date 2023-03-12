@@ -15,6 +15,7 @@ namespace API.DataAccess.Repositories
         {
             _db = db;
         }
+
         public async Task<UserAccount?> GetUser(string email)
         {
             var sql = "SELECT id, email, password_hash, password_salt FROM users_account WHERE email = @Email";
