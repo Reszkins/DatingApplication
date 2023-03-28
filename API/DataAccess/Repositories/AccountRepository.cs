@@ -5,6 +5,7 @@ namespace API.DataAccess.Repositories
     public interface IAccountRepository
     {
         Task<UserAccount?> GetUser(string email);
+        Task<UserAccount?> GetUser(int id);
         Task AddNewAccount(UserAccount newAccount, UserBaseInfo newAccountBaseInfo);
     }
 
@@ -26,6 +27,16 @@ namespace API.DataAccess.Repositories
             return users.FirstOrDefault();
         }
 
+        public async Task<UserAccount?> GetUser(int id)
+        {
+            var sql = "SELECT id, email, password_hash, password_salt FROM users_account WHERE id = @Id";
+            var parameters = new Dictionary<string, object> { { "@Id", id } };
+
+            var users = await _db.LoadData<UserAccount>(sql, parameters);
+
+            return users.FirstOrDefault();
+        }
+
         public async Task AddNewAccount(UserAccount newAccount, UserBaseInfo newAccountBaseInfo)
         {
             var sql = "INSERT INTO users_account (email, password_hash, password_salt) VALUES (@Email, @PasswordHash, @PasswordSalt)";
@@ -38,7 +49,7 @@ namespace API.DataAccess.Repositories
 
             var userInfo = GetUser(newAccount.Email);
 
-            sql = "INSERT INTO users_base_info (user_id, first_name, second_name, gender, date_of_birth) VALUES (@UserId, @FirstName, @SecondName, @Gender, @DateOfBirth)";
+            sql = "INSERT INTO users_base_info (user_id, first_name, second_name, gender, date_of_birth, description) VALUES (@UserId, @FirstName, @SecondName, @Gender, @DateOfBirth, null)";
             parameters = new Dictionary<string, object> {
                 { "@UserId", userInfo.Id },
                 { "@FirstName", newAccountBaseInfo.FirstName },

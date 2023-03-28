@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Microsoft.AspNetCore.SignalR;
+using API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddAuthentication(options =>
 {
@@ -29,6 +29,22 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = "http://localhost:8081",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("$ecr3tKeeyYT11nd3r@pp"))
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/hub/chat")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddCors(options =>
@@ -44,10 +60,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddTransient<ISqlDataAccess,SqlDataAccess>();
 builder.Services.AddTransient<IAccountRepository,AccountRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IMessageRepository, MessageRepository>();
 builder.Services.AddTransient<ITokenGeneratorService, TokenGeneratorService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -60,7 +78,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseCors("EnableCORS");
 
@@ -68,5 +86,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hub/chat");
 
 app.Run();

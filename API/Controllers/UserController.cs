@@ -13,23 +13,57 @@ namespace API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IAccountRepository _accountRepository;
         private readonly IUserRepository _userRepository;
 
-        public UserController(IAccountRepository accountRepository, IUserRepository userRepository)
+        public UserController(IUserRepository userRepository)
         {
-            _accountRepository = accountRepository;
             _userRepository = userRepository;
         }
 
         [HttpGet, Route("id")]
         public async Task<IActionResult> GetUserId(string email)
         {
-            var user = await _accountRepository.GetUser(email);
+            var userId = await _userRepository.GetUserId(email);
 
-            if(user is not null)
+            if(userId is not null)
             {
-                return Ok(user.Id);
+                return Ok(userId);
+            }
+            else
+            {
+                return BadRequest("No such email in database");
+            }
+        }
+
+        [HttpGet, Route("email")]
+        public async Task<IActionResult> GetUserEmail(int id)
+        {
+            var userEmail = await _userRepository.GetUserEmail(id);
+
+            if (userEmail is not null)
+            {
+                return Ok(userEmail);
+            }
+            else
+            {
+                return BadRequest("No such id in database");
+            }
+        }
+
+        [HttpGet, Route("info")]
+        public async Task<IActionResult> GetUserInfo(int userId)
+        {
+            var user = await _userRepository.GetUserBaseInfo(userId);
+
+            if (user is not null)
+            {
+                return Ok(new UserInfoDto
+                {
+                    FirstName = user.FirstName,
+                    SecondName = user.SecondName,
+                    Gender = user.Gender,
+                    DateOfBirth = user.DateOfBirth
+                });
             }
             else
             {
@@ -82,8 +116,14 @@ namespace API.Controllers
             {
                 return StatusCode(500);
             }
-
         }
 
+        [HttpGet, Route("answeredToForm")]
+        public async Task<IActionResult> UserAnsweredToForm()
+        {
+            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
+
+            return Ok(0);
+        }
     }
 }
