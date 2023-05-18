@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+psycopg2-binary
+apscheduler
+surprise
+pandas
+numpy

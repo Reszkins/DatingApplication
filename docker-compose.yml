@@ -22,3 +22,14 @@ services:
       - "8081:80"
     depends_on:
       - postgresql_database
+
+  matcher:
+    image: datingapplication-matcher:latest
+    build:
+      context: .
+      dockerfile: MATCHER/Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - api
+      - postgresql_database
