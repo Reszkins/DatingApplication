@@ -21,6 +21,21 @@ namespace API.Controllers
         }
 
         [HttpGet, Route("id")]
+        public async Task<IActionResult> GetUserId()
+        {
+            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
+
+            if (userId is not null)
+            {
+                return Ok(userId.Value);
+            }
+            else
+            {
+                return BadRequest("No such email in database");
+            }
+        }
+
+        [HttpGet, Route("id/{email}")]
         public async Task<IActionResult> GetUserId(string email)
         {
             var userId = await _userRepository.GetUserId(email);
@@ -51,6 +66,28 @@ namespace API.Controllers
         }
 
         [HttpGet, Route("info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
+            var user = await _userRepository.GetUserBaseInfo(userId.Value);
+
+            if (user is not null)
+            {
+                return Ok(new UserInfoDto
+                {
+                    FirstName = user.FirstName,
+                    SecondName = user.SecondName,
+                    Gender = user.Gender,
+                    DateOfBirth = user.DateOfBirth
+                });
+            }
+            else
+            {
+                return BadRequest("No such email in database");
+            }
+        }
+
+        [HttpGet, Route("info/{userId}")]
         public async Task<IActionResult> GetUserInfo(int userId)
         {
             var user = await _userRepository.GetUserBaseInfo(userId);
@@ -72,6 +109,22 @@ namespace API.Controllers
         }
 
         [HttpGet, Route("description")]
+        public async Task<IActionResult> GetUserDescription()
+        {
+            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
+            var description = await _userRepository.GetUserDescription(userId.Value);
+
+            if (description is not null)
+            {
+                return Ok(description);
+            }
+            else
+            {
+                return Ok(null);
+            }
+        }
+
+        [HttpGet, Route("description/{userId}")]
         public async Task<IActionResult> GetUserDescription(int userId)
         {
             var description = await _userRepository.GetUserDescription(userId);
