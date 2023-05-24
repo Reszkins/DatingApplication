@@ -24,7 +24,7 @@ def find_matches(user_id, num_matches):
         target_user = User.query.get(target_user_id)
         
         prediction_score = collaborative_filtering(user_id, target_user_id)
-        questionnaire_score = 1 # questionnaire_correlation(user, target_user)
+        questionnaire_score = questionnaire_correlation(user, target_user)
 
         combined_score = weights['collaborative_filtering'] * prediction_score + \
             weights['questionnaire_correlation'] * questionnaire_score
