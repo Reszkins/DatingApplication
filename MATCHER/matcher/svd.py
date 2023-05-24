@@ -18,13 +18,14 @@ def update_svd_model(app):
         behavior_data, dataset_size = download_user_behavior_data()
         if (dataset_size < 5):
             app.logger.warn(f"Dataset is too small to start training, [dataset_size]={dataset_size}")
-            return
+            return False
         trainset, _ = train_test_split(behavior_data)
         new_svd = SVD()
         app.logger.info("Training...")
         new_svd.fit(trainset)
         svd.model = new_svd
         app.logger.info("Model updated")
+        return True
 
 def download_user_behavior_data():
     behavior_data = UserBehavior.query.with_entities(

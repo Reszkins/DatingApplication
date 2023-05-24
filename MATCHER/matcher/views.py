@@ -1,6 +1,7 @@
-from flask import Blueprint, request, abort, jsonify
+from flask import Blueprint, request, abort, jsonify, make_response, current_app
 from .utils import find_matches
 from .exceptions import ParameterError
+from .svd import update_svd_model
 
 blueprint = Blueprint("matches", __name__, url_prefix='/')
 
@@ -16,3 +17,10 @@ def matches():
         abort(400, description=str(e))
 
     return jsonify(matches)
+
+@blueprint.route('/update_model')
+def update_model():
+    succeeded = update_svd_model(current_app)
+    if not succeeded:
+        return make_response(f'Failed to update model', 409)
+    return make_response('Model updated successfully', 200)
