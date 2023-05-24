@@ -5,6 +5,7 @@ import numpy as np
 from .database import db
 from .models import User
 from .svd import svd
+from .exceptions import ParameterError
 
 weights = {
     'collaborative_filtering': 0.5,
@@ -13,6 +14,8 @@ weights = {
 
 def find_matches(user_id, num_matches):
     user = User.query.get(user_id)
+    if not user:
+        raise ParameterError(f"No user with [id]={user_id}")
     all_users = User.query.all()
     user_ids = [user.id for user in all_users if user.id != user_id]
     
