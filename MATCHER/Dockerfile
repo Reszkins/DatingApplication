@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.9-slim-buster
 
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -19,4 +19,4 @@ ENV FLASK_DEBUG=0
 
 EXPOSE 5000
 
-CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0" ]
+CMD [ "python3", "-m", "gunicorn", "-b", "0.0.0.0:5000", "matcher:create_app()" ]
