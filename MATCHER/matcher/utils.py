@@ -22,6 +22,9 @@ def find_matches(user_id, num_matches):
     compatibility_scores = []
     for target_user_id in user_ids:
         target_user = User.query.get(target_user_id)
+
+        if not is_sexually_compatible(user, target_user):
+            continue
         
         prediction_score = collaborative_filtering(user_id, target_user_id)
         questionnaire_score = questionnaire_correlation(user, target_user)
@@ -58,3 +61,21 @@ def questionnaire_correlation(user: User, targer_user: User):
     correlation_coefficient = np.corrcoef(user_answers, target_user_answers)[0][1]
     normalized_questionnaire_correlation = (correlation_coefficient + 1) / 2
     return normalized_questionnaire_correlation
+
+def is_sexually_compatible(user, target_user):
+    if user.sexuality == 'heterosexual':
+        if target_user.sexuality == 'heterosexual' and user.gender != target_user.gender:
+            return True
+        if target_user.sexuality == 'bisexual' and user.gender != target_user.gender:
+            return True
+    elif user.sexuality == 'homosexual':
+        if target_user.sexuality == 'homosexual' and user.gender == target_user.gender:
+            return True
+        if target_user.sexuality == 'bisexual' and user.gender == target_user.gender:
+            return True
+    elif user.sexuality == 'bisexual':
+        if (target_user.sexuality == 'heterosexual' and user.gender != target_user.gender) or \
+           (target_user.sexuality == 'homosexual' and user.gender == target_user.gender) or \
+           target_user.sexuality == 'bisexual':
+            return True
+    return False
