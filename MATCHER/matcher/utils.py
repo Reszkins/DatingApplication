@@ -1,3 +1,4 @@
+from flask import current_app as app
 import pandas as pd
 import numpy as np
 
@@ -39,6 +40,9 @@ def normalize_user_data(user_data):
     return user_data
 
 def collaborative_filtering(user_id, target_user_id):
+    if (svd.model == None):
+        app.logger.warn("Skipping callaborative_filtering, model is not initialized")
+        return 0
     prediction = svd.model.predict(user_id, target_user_id).est
     normalized_prediction = (prediction - 1) / 4
     return normalized_prediction

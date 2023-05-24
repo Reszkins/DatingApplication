@@ -95,24 +95,3 @@ CREATE TABLE questionnaires
   FOREIGN KEY(user_id)
     REFERENCES users_account(id)
 );
-
--- Debug
--- INSERT INTO users_account(email) VALUES ('a');
--- INSERT INTO users_account(email) VALUES ('b');
--- INSERT INTO users_account(email) VALUES ('c');
--- INSERT INTO users_account(email) VALUES ('d');
--- INSERT INTO users_account(email) VALUES ('e');
--- INSERT INTO users_account(email) VALUES ('f');
-
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (1, 21, 'male', 'heterosexual');
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (2, 24, 'female', 'heterosexual');
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (3, 22, 'male', 'homosexual');
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (4, 31, 'female', 'homosexual');
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (5, 33, 'male', 'bisexual');
--- INSERT INTO users_matching_info(user_id, age, gender, sexuality) VALUES (6, 23, 'female', 'bisexual');
-
--- INSERT INTO users_behavior(user_id, target_user_id, rating) VALUES (1, 2, 3);
--- INSERT INTO users_behavior(user_id, target_user_id, rating) VALUES (1, 5, 4);
--- INSERT INTO users_behavior(user_id, target_user_id, rating) VALUES (1, 6, 5);
--- INSERT INTO users_behavior(user_id, target_user_id, rating) VALUES (3, 4, 5);
--- INSERT INTO users_behavior(user_id, target_user_id, rating) VALUES (4, 3, 1);

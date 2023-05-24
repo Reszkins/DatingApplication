@@ -8,7 +8,7 @@ from .views import blueprint as views_blueprint
 
 SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://admin:admin@postgresql_database/ApplicationDatabase"
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(daemon=True)
 
 def create_app():
     app = Flask(__name__)
@@ -30,7 +30,6 @@ def initialize_db(app: Flask):
 
 def initialize_svd_model(app: Flask):
     from .svd import update_svd_model
-    with app.app_context():
-        update_svd_model()
-    scheduler.add_job(update_svd_model, trigger='interval', days=1)
+    update_svd_model(app)
+    scheduler.add_job(lambda: update_svd_model(app), 'interval', minutes=15)
     scheduler.start()
