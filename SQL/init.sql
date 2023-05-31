@@ -34,7 +34,7 @@ CREATE TABLE messages
 	  REFERENCES users_account(id)
 );
 
-CREATE TABLE users_dislikes
+CREATE TABLE users_dislikes -- SHOULD BE REMOVED, DISLIKES SHOULD BE RECORDED in users_behavior AS RATIGN = 0, LIKE SHOULD BE RATING = 1
 (
   user_id INT,
   disliked_user_id INT,
@@ -93,5 +93,28 @@ CREATE TABLE questionnaires
   q6 INT,
   CONSTRAINT fk_user
   FOREIGN KEY(user_id)
-    REFERENCES users_account(id)
+    REFERENCES users_account(id),
+  CONSTRAINT check_scale
+  CHECK (q1 >= 1 AND q1 <= 5 AND
+    q2 >= 1 AND q2 <= 5 AND
+    q3 >= 1 AND q3 <= 5 AND
+    q4 >= 1 AND q4 <= 5 AND
+    q5 >= 1 AND q5 <= 5 AND
+    q6 >= 1 AND q6 <= 5)
 );
+
+CREATE TABLE questions (
+  id SERIAL PRIMARY KEY,
+  question_text TEXT NOT NULL,
+  question_number INT UNIQUE
+);
+
+INSERT INTO questions (question_text, question_number)
+VALUES
+  ('Jak często preferujesz szczere i otwarte rozmowy w związku?', 1),
+  ('Na ile często chciałbyś spędzać czas razem jako para?', 2),
+  ('Jak istotne dla Ciebie jest okazywanie fizycznej bliskości (np. przytulanie, trzymanie za ręce) w związku?', 3),
+  ('Jak bardzo jesteś skłonny do podejmowania nowych i ekscytujących wyzwań?', 4),
+  ('Jak ważne jest dla Ciebie, aby Twój partner i Ty mieli wspólne zainteresowania i hobby?', 5),
+  ('Jak bardzo potrzebujesz czasu i przestrzeni dla siebie w związku?', 6)
+ON CONFLICT (question_number) DO NOTHING;

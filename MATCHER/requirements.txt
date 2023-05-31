@@ -6,3 +6,4 @@ surprise
 pandas
 numpy
 gunicorn
+scipy

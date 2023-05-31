@@ -1,15 +1,16 @@
 from flask import current_app as app
-import pandas as pd
 import numpy as np
+from scipy.spatial.distance import cosine
 
-from .database import db
 from .models import User
 from .svd import svd
 from .exceptions import ParameterError
 
 weights = {
-    'collaborative_filtering': 0.5,
-    'questionnaire_correlation': 0.5
+    'collaborative_filtering': 0.1,
+    'questionnaire_correlation': 0.3,
+    'age_compatibility': 0.2,
+    'trait_compatibility': 0.4
 }
 
 def find_matches(user_id, num_matches):
@@ -28,9 +29,13 @@ def find_matches(user_id, num_matches):
         
         prediction_score = collaborative_filtering(user_id, target_user_id)
         questionnaire_score = questionnaire_correlation(user, target_user)
+        age_score = age_compatibility(user, target_user)
+        trait_compatibility_score = trait_compatibility(user, target_user)
 
         combined_score = weights['collaborative_filtering'] * prediction_score + \
-            weights['questionnaire_correlation'] * questionnaire_score
+            weights['questionnaire_correlation'] * questionnaire_score + \
+            weights['age_compatibility'] * age_score + \
+            weights['trait_compatibility'] * trait_compatibility_score
 
         compatibility_scores.append((target_user_id, combined_score))
 
@@ -42,8 +47,35 @@ def find_matches(user_id, num_matches):
         matches.append({'user_id': user_id, 'target_user_id': targer_user_id, 'score': score})
     return matches
 
-def normalize_user_data(user_data):
-    return user_data
+def age_compatibility(user: User, target_user: User):
+    age_difference = abs(user.age - target_user.age)
+    return 1.0 - (age_difference / max(user.age, target_user.age))
+
+def trait_compatibility(user: User, target_user: User):
+    compatibility_score = 0
+    
+    if user.education_level == target_user.education_level:
+        compatibility_score += 1.0
+    
+    if user.want_children == target_user.want_children:
+        compatibility_score += 1.0
+    
+    if user.relationship_type == target_user.relationship_type:
+        compatibility_score += 1.0
+    
+    if user.attachment_style == target_user.attachment_style:
+        compatibility_score += 1.0
+    
+    love_languages_similarity = cosine_similarity(user.love_languages_rating, target_user.love_languages_rating)
+    big_five_traits_similarity = cosine_similarity(user.big_five_traits_rating, target_user.big_five_traits_rating)
+    values_beliefs_similarity = cosine_similarity(user.values_and_beliefs_rating, target_user.values_and_beliefs_rating)
+    
+    compatibility_score += (love_languages_similarity + big_five_traits_similarity + values_beliefs_similarity) / 3
+    
+    return compatibility_score
+
+def cosine_similarity(traits1, traits2):
+    return 1 - cosine(list(traits1.values), list(traits2.values))
 
 def collaborative_filtering(user_id, target_user_id):
     if (svd.model == None):
