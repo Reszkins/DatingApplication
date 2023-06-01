@@ -1,42 +1,42 @@
 from flask import current_app as app
-import numpy as np
 from scipy.spatial.distance import cosine
 
-from .models import User
+from .models import UserMatchingInfo
 from .svd import svd
 from .exceptions import ParameterError
 
 weights = {
     'collaborative_filtering': 0.1,
-    'questionnaire_correlation': 0.3,
-    'age_compatibility': 0.2,
-    'trait_compatibility': 0.4
+    'age_compatibility': 0.15,
+    'trait_compatibility': 0.4,
+    'want_children': 0.1,
+    'relationship_type': 0.25
 }
 
 def find_matches(user_id, num_matches):
-    user = User.query.get(user_id)
+    user = UserMatchingInfo.query.get(user_id)
     if not user:
         raise ParameterError(f"No user with [id]={user_id}")
-    all_users = User.query.all()
+    all_users = UserMatchingInfo.query.all()
     user_ids = [user.id for user in all_users if user.id != user_id]
     
     compatibility_scores = []
     for target_user_id in user_ids:
-        target_user = User.query.get(target_user_id)
+        target_user = UserMatchingInfo.query.get(target_user_id)
 
         if not is_sexually_compatible(user, target_user):
             continue
-        
+
         prediction_score = collaborative_filtering(user_id, target_user_id)
-        questionnaire_score = questionnaire_correlation(user, target_user)
         age_score = age_compatibility(user, target_user)
         trait_compatibility_score = trait_compatibility(user, target_user)
 
         combined_score = weights['collaborative_filtering'] * prediction_score + \
-            weights['questionnaire_correlation'] * questionnaire_score + \
             weights['age_compatibility'] * age_score + \
-            weights['trait_compatibility'] * trait_compatibility_score
-
+            weights['trait_compatibility'] * trait_compatibility_score + \
+            weights['want_children'] * (1 if user.want_children == target_user.want_children else 0) + \
+            weights['relationship_type'] * (1 if user.relationship_type == target_user.relationship_type else 0)
+        
         compatibility_scores.append((target_user_id, combined_score))
 
     compatibility_scores.sort(key=lambda x: x[1], reverse=True)
@@ -47,35 +47,31 @@ def find_matches(user_id, num_matches):
         matches.append({'user_id': user_id, 'target_user_id': targer_user_id, 'score': score})
     return matches
 
-def age_compatibility(user: User, target_user: User):
+def age_compatibility(user: UserMatchingInfo, target_user: UserMatchingInfo):
     age_difference = abs(user.age - target_user.age)
     return 1.0 - (age_difference / max(user.age, target_user.age))
 
-def trait_compatibility(user: User, target_user: User):
-    compatibility_score = 0
-    
-    if user.education_level == target_user.education_level:
-        compatibility_score += 1.0
-    
-    if user.want_children == target_user.want_children:
-        compatibility_score += 1.0
-    
-    if user.relationship_type == target_user.relationship_type:
-        compatibility_score += 1.0
-    
-    if user.attachment_style == target_user.attachment_style:
-        compatibility_score += 1.0
-    
-    love_languages_similarity = cosine_similarity(user.love_languages_rating, target_user.love_languages_rating)
-    big_five_traits_similarity = cosine_similarity(user.big_five_traits_rating, target_user.big_five_traits_rating)
-    values_beliefs_similarity = cosine_similarity(user.values_and_beliefs_rating, target_user.values_and_beliefs_rating)
-    
-    compatibility_score += (love_languages_similarity + big_five_traits_similarity + values_beliefs_similarity) / 3
-    
-    return compatibility_score
+def love_languages_vector(user: UserMatchingInfo):
+    return [user.love_languages_acts, user.love_languages_gifts, user.love_languages_quality_time,
+            user.love_languages_touch, user.love_languages_words]
+
+def big_five_vector(user: UserMatchingInfo):
+    return [user.big_five_agreeableness, user.big_five_conscientiousness, user.big_five_extraversion,
+            user.big_five_neuroticism, user.big_five_openness]
+
+def values_beliefs_vector(user: UserMatchingInfo):
+    return [user.values_beliefs_career, user.values_beliefs_family, user.values_beliefs_political,
+            user.values_beliefs_religious]
+
+def trait_compatibility(user: UserMatchingInfo, target_user: UserMatchingInfo):
+    love_languages_similarity = cosine_similarity(love_languages_vector(user), love_languages_vector(target_user))
+    big_five_traits_similarity = cosine_similarity(big_five_vector(user), big_five_vector(target_user))
+    values_beliefs_similarity = cosine_similarity(values_beliefs_vector(user), values_beliefs_vector(target_user))
+    trait_compatibility_score = (love_languages_similarity + big_five_traits_similarity + values_beliefs_similarity) / 3
+    return trait_compatibility_score
 
 def cosine_similarity(traits1, traits2):
-    return 1 - cosine(list(traits1.values), list(traits2.values))
+    return 1 - cosine(traits1, traits2)
 
 def collaborative_filtering(user_id, target_user_id):
     if (svd.model == None):
@@ -85,16 +81,7 @@ def collaborative_filtering(user_id, target_user_id):
     normalized_prediction = (prediction - 1) / 4
     return normalized_prediction
 
-def questionnaire_correlation(user: User, targer_user: User):
-    user_answers = [ user.questionnaire.q1, user.questionnaire.q2, user.questionnaire.q3,
-                    user.questionnaire.q4, user.questionnaire.q5, user.questionnaire.q6 ]
-    target_user_answers = [ targer_user.questionnaire.q1, targer_user.questionnaire.q2, targer_user.questionnaire.q3,
-                    targer_user.questionnaire.q4, targer_user.questionnaire.q5, targer_user.questionnaire.q6 ]
-    correlation_coefficient = np.corrcoef(user_answers, target_user_answers)[0][1]
-    normalized_questionnaire_correlation = (correlation_coefficient + 1) / 2
-    return normalized_questionnaire_correlation
-
-def is_sexually_compatible(user, target_user):
+def is_sexually_compatible(user: UserMatchingInfo, target_user: UserMatchingInfo):
     if user.sexuality == 'heterosexual':
         if target_user.sexuality == 'heterosexual' and user.gender != target_user.gender:
             return True

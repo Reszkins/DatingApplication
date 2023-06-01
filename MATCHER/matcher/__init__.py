@@ -20,7 +20,7 @@ def create_app():
     return app
 
 def initialize_db(app: Flask):
-    from .models import User, UserBehavior, Questionnaire
+    from .models import User, UserBehavior, UserMatchingInfo
     db.init_app(app)
     with app.app_context():
         db_session = scoped_session(sessionmaker(db.engine))
