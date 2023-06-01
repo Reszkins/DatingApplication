@@ -14,6 +14,12 @@ namespace API.Controllers
             throw new NotImplementedException();
         }
 
+        [HttpGet, Route("all/{userId}")]
+        public async Task<IActionResult> GetPhotos(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddPhoto()
         {

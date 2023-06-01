@@ -20,7 +20,7 @@ namespace API.Services
                 issuer: "http://localhost:8081",
                 audience: "http://localhost:8081",
                 claims: new List<Claim> { new Claim("userName", email) },
-                expires: DateTime.Now.AddMinutes(10),
+                expires: DateTime.Now.AddMinutes(24 * 60),
                 signingCredentials: signingCredentials
             );
 

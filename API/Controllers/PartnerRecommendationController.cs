@@ -24,7 +24,7 @@ namespace API.Controllers
             var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
 
             var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"localhost:5000/matches?user_id={userId.Value}&num_matches=10");
+            var response = await httpClient.GetAsync($"http://localhost:5000/matches?user_id={userId.Value}&num_matches=10");
 
             var partners = await response.Content.ReadFromJsonAsync<List<RecommendedPartnerReponseDto>>();
 

@@ -13,7 +13,8 @@ namespace API.Mapping
                 typeof(UserBaseInfo),
                 typeof(UserAccount),
                 typeof(UserDescription),
-                typeof(Message)
+                typeof(Message),
+                typeof(Question)
             };
 
             foreach(var modelType in modelTypes)

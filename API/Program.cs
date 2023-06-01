@@ -61,6 +61,7 @@ builder.Services.AddTransient<ISqlDataAccess,SqlDataAccess>();
 builder.Services.AddTransient<IAccountRepository,AccountRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IMessageRepository, MessageRepository>();
+builder.Services.AddTransient<IQuestionRepository, QuestionRepository>();
 builder.Services.AddTransient<ITokenGeneratorService, TokenGeneratorService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
