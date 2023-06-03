@@ -40,15 +40,20 @@ namespace API.Controllers
         }
 
         [HttpPost("answer")]
-        public async Task<IActionResult> SaveAnswer(int questionId, int answer)
+        public async Task<IActionResult> SaveAnswer([FromBody] AnswersDto answersDto)
         {
             var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
 
             if (userId is null) return Ok(500);
 
-            if (answer < 1 || answer > 5) return BadRequest("Answer has wrong value");
+            var answers = answersDto.Answers;
 
-            await _questionRepository.SaveAnswer(questionId, answer, userId.Value);
+            foreach(var answer in answers)
+            {
+                if (answer.Answer < 1 || answer.Answer > 5) return BadRequest("Answer has wrong value");
+            }
+
+            await _questionRepository.SaveAnswer(answers, userId.Value);
 
             return Ok();
         }

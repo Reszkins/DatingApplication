@@ -16,6 +16,9 @@ namespace API.Models
         [Column("gender")]
         public string Gender { get; set; } = string.Empty;
 
+        [Column("sexuality")]
+        public string Sexuality { get; set; } = string.Empty;
+
         [Column("date_of_birth")]
         public DateTime DateOfBirth { get; set; }
     }

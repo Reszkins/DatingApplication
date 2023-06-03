@@ -12,5 +12,8 @@ namespace API.Models
 
         [Column("question_text")]
         public string QuestionText { get; set; } = string.Empty;
+
+        [Column("matching_info_column_name")]
+        public string MatchingInfoColumnName { get; set; } = string.Empty;
     }
 }

@@ -6,7 +6,7 @@ namespace API.DataAccess.Repositories
     public interface IQuestionRepository
     {
         Task<List<Question>> GetQuestions();
-        Task SaveAnswer(int questionId, int answer, int userId);
+        Task SaveAnswer(List<AnswerDto> answers, int userId);
     }
 
     public class QuestionRepository : IQuestionRepository
@@ -26,37 +26,48 @@ namespace API.DataAccess.Repositories
             return questions.ToList();
         }
 
-        public async Task SaveAnswer(int questionId, int answer, int userId)
+        public async Task SaveAnswer(List<AnswerDto> answers, int userId)
         {
-            var sql = "SELECT user_id FROM questionnaires WHERE user_id = @UserId";
+            var sql = "SELECT user_id FROM users_matching_info WHERE user_id = @UserId";
 
             var parameters = new Dictionary<string, object> {
                 { "@UserId", userId }
             };
 
             var result = await _db.LoadData<int>(sql, parameters);
+
             if(result.Count == 0)
             {
-                sql = $"INSERT INTO questionnaires (user_id, q{questionId}) VALUES (@UserId, @Answer)";
+                sql = $"INSERT INTO users_matching_info (user_id) VALUES (@UserId)";
 
                 parameters = new Dictionary<string, object> {
                     { "@UserId", userId },
-                    { "@Answer", answer }
                 };
 
                 await _db.SaveData(sql, parameters);
             }
-            else
+
+            foreach(var answer in answers)
             {
-                sql = $"UPDATE questionnaires SET q{questionId} = @Answer WHERE user_id = @UserId";
+                sql = "SELECT matching_info_column_name FROM questions WHERE question_number = @QuestionNumber";
+
+                parameters = new Dictionary<string, object> {
+                    { "@QuestionNumber", answer.QuestionNumber }
+                };
+
+                var response = await _db.LoadData<string>(sql, parameters);
+                var column = response.FirstOrDefault();
+
+
+                sql = $"UPDATE users_matching_info SET {column} = @Answer WHERE user_id = @UserId";
 
                 parameters = new Dictionary<string, object> {
                     { "@UserId", userId },
-                    { "@Answer", answer }
+                    { "@Answer", answer.Answer }
                 };
 
                 await _db.UpdateData(sql, parameters);
-            }
+            };
         }
     }
 }

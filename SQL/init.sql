@@ -35,18 +35,6 @@ CREATE TABLE messages
 	  REFERENCES users_account(id)
 );
 
-CREATE TABLE users_dislikes -- SHOULD BE REMOVED, DISLIKES SHOULD BE RECORDED in users_behavior AS RATIGN = 0, LIKE SHOULD BE RATING = 1
-(
-  user_id INT,
-  disliked_user_id INT,
-  CONSTRAINT fk_user
-	FOREIGN KEY(user_id)
-	  REFERENCES users_account(id),
-  CONSTRAINT fk_disliked_user
-	FOREIGN KEY(disliked_user_id)
-	  REFERENCES users_account(id)
-);
-
 CREATE TABLE users_matching_info
 (
   id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
