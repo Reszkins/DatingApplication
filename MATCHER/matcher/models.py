@@ -2,25 +2,44 @@ from .database import Base
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.dialects.postgresql import DATE
+from sqlalchemy.dialects.postgresql import DATE, TEXT
 from datetime import date
 
-class User(Base):
-    __tablename__ = 'users_base_info'
+class UserAccount(Base):
+    __tablename__ = 'users_account'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users_account.id'))
+    email = Column(String)
+
+class UserBaseInfo(Base):
+    __tablename__ = 'users_base_info'
+
+    user_id = Column(Integer, ForeignKey('users_account.id'), primary_key=True)
     gender = Column(String)
     sexuality = Column(String)
     date_of_birth = Column(DATE)
+    description = Column(TEXT)
+    first_name = Column(String)
+    second_name = Column(String)
 
-    matching_info = relationship('UserMatchingInfo', back_populates='user')
+    account = relationship('UserAccount')
+
+    def json(self):
+        return {
+            "user_id": self.user_id,
+            "email": self.account.email,
+            "first_name": self.first_name,
+            "second_name": self.second_name,
+            "gender": self.gender,
+            "sexuality": self.sexuality,
+            "date_of_birth": self.date_of_birth,
+            "description": self.description
+        }
 
 class UserMatchingInfo(Base):
     __tablename__ = 'users_matching_info'
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users_base_info.id'))
+    user_id = Column(Integer, ForeignKey('users_base_info.user_id'), primary_key=True)
     want_children = Column(Integer)
     relationship_type = Column(Integer)
     love_languages_words = Column(Integer)
@@ -44,7 +63,7 @@ class UserMatchingInfo(Base):
     shared_interests = Column(Integer)
     personal_space = Column(Integer)
 
-    user = relationship('User', back_populates='matching_info')
+    user = relationship('UserBaseInfo')
 
     @hybrid_property
     def age(self):

@@ -1,7 +1,7 @@
 from flask import current_app as app
 from scipy.spatial.distance import cosine
 
-from .models import UserMatchingInfo
+from .models import UserMatchingInfo, UserAccount, UserBaseInfo
 from .svd import svd
 from .exceptions import ParameterError
 
@@ -14,11 +14,14 @@ weights = {
 }
 
 def find_matches(user_id, num_matches):
-    user = UserMatchingInfo.query.get(user_id)
-    if not user:
+    user_account = UserAccount.query.get(user_id)
+    if not user_account:
         raise ParameterError(f"No user with [id]={user_id}")
+    user = UserMatchingInfo.query.get(user_id)
+    if not user or not UserBaseInfo.query.get(user_id):
+        raise ParameterError(f"No base/matching info for user with [id]={user_id}")
     all_users = UserMatchingInfo.query.all()
-    user_ids = [user.id for user in all_users if user.id != user_id]
+    user_ids = [x.user_id for x in all_users if x.user_id != user_id]
     
     compatibility_scores = []
     for target_user_id in user_ids:

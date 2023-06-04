@@ -8,7 +8,7 @@ CREATE TABLE users_account
 
 CREATE TABLE users_base_info
 (
-  user_id INT,
+  user_id INT PRIMARY KEY,
   first_name VARCHAR(50),
   second_name VARCHAR(50),
   gender VARCHAR(10),
@@ -37,8 +37,7 @@ CREATE TABLE messages
 
 CREATE TABLE users_matching_info
 (
-  id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  user_id INT,
+  user_id INT PRIMARY KEY,
   want_children INT,
   relationship_type INT,
   love_languages_words INT,
