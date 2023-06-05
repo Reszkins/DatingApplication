@@ -85,3 +85,11 @@ class UserBehavior(Base):
     user_id = Column(Integer, ForeignKey('users_account.id'))
     target_user_id = Column(Integer, ForeignKey('users_account.id'))
     rating = Column(Integer)
+
+    def json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "target_user_id": self.target_user_id,
+            "rating": self.rating
+        }

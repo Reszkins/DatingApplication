@@ -1,8 +1,10 @@
 from faker import Faker
+from itertools import permutations
 import random
 
-from .models import UserAccount, UserBaseInfo, UserMatchingInfo
+from .models import UserAccount, UserBaseInfo, UserMatchingInfo, UserBehavior
 from .database import db
+from .exceptions import ParameterError
 
 fake = Faker()
 
@@ -62,3 +64,23 @@ def generate_random_users(num_users):
         db.session.flush()
     db.session.commit()
     return users
+
+def generate_random_ratings(num_ratings):
+    user_ids = [id[0] for id in db.session.query(UserAccount.id).all()]
+    possible_ratings = list(permutations(user_ids, 2))
+    possible_ratings = [(user1, user2) for user1, user2 in possible_ratings if user1 != user2]
+    random.shuffle(possible_ratings)
+    existing_ratings = [(rating.user_id, rating.target_user_id) for rating in UserBehavior.query.all()]
+    possible_ratings = [rating for rating in possible_ratings if rating not in existing_ratings]
+    ratings = []
+    if num_ratings > len(possible_ratings):
+        raise ParameterError("Cannot generate more unique ratings than possible pairs of users.")
+    for _ in range(num_ratings):
+        user_id, target_user_id = possible_ratings.pop()
+        rating = random.randint(1, 5)
+        new_rating = UserBehavior(user_id=user_id, target_user_id=target_user_id, rating=rating)
+        db.session.add(new_rating)
+        db.session.flush()
+        ratings.append(new_rating.json())
+    db.session.commit()
+    return ratings

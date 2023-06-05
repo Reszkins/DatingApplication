@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, jsonify, make_response, current_app
 from .compatibility import find_matches
-from .user_generator import generate_random_users
+from .user_generator import generate_random_users, generate_random_ratings
 from .exceptions import ParameterError
 from .svd import update_svd_model
 
@@ -31,3 +31,9 @@ def generate_users():
     num_users = request.args.get('num_users', 1, type=int)
     generated_user_ids = generate_random_users(num_users)
     return jsonify(generated_user_ids)
+
+@blueprint.route('/generate_ratings')
+def generate_ratings():
+    num_ratings = request.args.get('num_ratings', 1, type=int)
+    generated_ratings = generate_random_ratings(num_ratings)
+    return jsonify(generated_ratings)
