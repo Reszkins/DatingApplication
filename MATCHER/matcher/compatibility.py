@@ -1,7 +1,7 @@
 from flask import current_app as app
 from scipy.spatial.distance import cosine
 
-from .models import UserMatchingInfo, UserAccount, UserBaseInfo
+from .models import UserMatchingInfo, UserAccount, UserBaseInfo, UserBehavior
 from .svd import svd
 from .exceptions import ParameterError
 
@@ -19,10 +19,12 @@ def find_matches(user_id, num_matches):
         raise ParameterError(f"No user with [id]={user_id}")
     user = UserMatchingInfo.query.get(user_id)
     if not user or not UserBaseInfo.query.get(user_id):
-        raise ParameterError(f"No base/matching info for user with [id]={user_id}")
-    all_users = UserMatchingInfo.query.all()
-    user_ids = [x.user_id for x in all_users if x.user_id != user_id]
+        raise ParameterError(f"No base/matching info for user with [id]={user_id}")    
     
+    rated_user_ids = [rating.target_user_id for rating in UserBehavior.query.filter(UserBehavior.user_id == user_id).all()]
+    users_not_rated_by_user = UserAccount.query.filter(UserAccount.id != user_id, ~UserAccount.id.in_(rated_user_ids)).all()
+    user_ids = [x.id for x in users_not_rated_by_user]
+
     compatibility_scores = []
     for target_user_id in user_ids:
         target_user = UserMatchingInfo.query.get(target_user_id)
