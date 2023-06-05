@@ -35,5 +35,8 @@ def generate_users():
 @blueprint.route('/generate_ratings')
 def generate_ratings():
     num_ratings = request.args.get('num_ratings', 1, type=int)
-    generated_ratings = generate_random_ratings(num_ratings)
+    try:
+        generated_ratings = generate_random_ratings(num_ratings)
+    except ParameterError as e:
+        abort(400, description=str(e))
     return jsonify(generated_ratings)
