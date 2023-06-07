@@ -19,4 +19,5 @@ RUN dotnet publish "API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+VOLUME /app/Photos
 ENTRYPOINT ["dotnet", "API.dll"]
