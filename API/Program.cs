@@ -68,6 +68,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
+builder.Services.AddScoped<PhotoService>();
+
 var app = builder.Build();
 
 DapperCustomColumnMapper.SetCustomColumnMapper();

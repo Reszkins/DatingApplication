@@ -22,6 +22,8 @@ services:
       - "8081:80"
     depends_on:
       - postgresql_database
+    volumes:
+      - ./Photos:/app/Photos
 
   matcher:
     image: datingapplication-matcher:latest
