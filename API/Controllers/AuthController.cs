@@ -15,10 +15,12 @@ namespace API.Controllers
     {
         private readonly IAccountRepository _accountRepository;
         private readonly ITokenGeneratorService _tokenGenerator;
-        public AuthController(IAccountRepository accountRepository, ITokenGeneratorService tokenGenerator)
+        private readonly IQuestionRepository _questionRepository;
+        public AuthController(IAccountRepository accountRepository, ITokenGeneratorService tokenGenerator, IQuestionRepository questionRepository)
         {
             _accountRepository = accountRepository;
             _tokenGenerator = tokenGenerator;
+            _questionRepository = questionRepository;
         }
 
         [HttpPost, Route("login")]
@@ -36,7 +38,9 @@ namespace API.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid username or password.");
             }
 
-            return Ok(new { Token = _tokenGenerator.GenerateToken(credentials.Email) });
+            var answeredToForm = await _questionRepository.CheckIfUserAnsweredToQuestions(user.Id);
+
+            return Ok(new { Token = _tokenGenerator.GenerateToken(credentials.Email), AnsweredToForm = answeredToForm });
         }
 
         [HttpPost, Route("register")]

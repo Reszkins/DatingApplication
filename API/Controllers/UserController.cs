@@ -170,13 +170,5 @@ namespace API.Controllers
                 return StatusCode(500);
             }
         }
-
-        [HttpGet, Route("answeredToForm")]
-        public async Task<IActionResult> UserAnsweredToForm()
-        {
-            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
-
-            return Ok(0);
-        }
     }
 }

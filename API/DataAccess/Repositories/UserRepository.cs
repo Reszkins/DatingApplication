@@ -10,6 +10,7 @@ namespace API.DataAccess.Repositories
         Task<string?> GetUserDescription(int userId);
         Task SetUserDescription(int userId, string description);
         Task DeleteUserDescription(int userId);
+        Task SetUserRating(int userId, int targetUserId, int rating);
     }
 
     public class UserRepository : IUserRepository
@@ -52,8 +53,8 @@ namespace API.DataAccess.Repositories
 
         public async Task<string?> GetUserDescription(int userId)
         {
-            var sql = "SELECT description FROM users_base_info WHERE user_id = @userId";
-            var parameters = new Dictionary<string, object> { { "@userId", userId } };
+            var sql = "SELECT description FROM users_base_info WHERE user_id = @UserId";
+            var parameters = new Dictionary<string, object> { { "@UserId", userId } };
 
             var description = await _db.LoadData<string>(sql, parameters);
 
@@ -62,18 +63,41 @@ namespace API.DataAccess.Repositories
 
         public async Task SetUserDescription(int userId, string description)
         {
-            var sql = "UPDATE users_base_info SET description = @description WHERE user_id = @userId";
-            var parameters = new Dictionary<string, object> { { "@userId", userId }, { "@description", description } };
+            var sql = "UPDATE users_base_info SET description = @description WHERE user_id = @UserId";
+            var parameters = new Dictionary<string, object> { { "@UserId", userId }, { "@description", description } };
 
             await _db.UpdateData(sql, parameters);
         }
 
         public async Task DeleteUserDescription(int userId)
         {
-            var sql = "UPDATE users_base_info SET description = null WHERE user_id = @userId";
-            var parameters = new Dictionary<string, object> { { "@userId", userId } };
+            var sql = "UPDATE users_base_info SET description = null WHERE user_id = @UserId";
+            var parameters = new Dictionary<string, object> { { "@UserId", userId } };
 
             await _db.DeleteData(sql, parameters);
+        }
+
+        public async Task SetUserRating(int userId, int targetUserId, int rating)
+        {
+            var sql = "SELECT rating FROM users_behavior WHERE user_id = @UserId AND target_user_id = @TargetUserId";
+            var parameters = new Dictionary<string, object> { { "@UserId", userId }, { "@TargetUserId", targetUserId } };
+
+            var result = await _db.LoadData<int>(sql, parameters);
+
+            if(result.Count == 0)
+            {
+                sql = "INSERT INTO users_behavior (user_id, target_user_id, rating) VALUES (@UserId, @TargetUserId, @Rating)";
+                parameters = new Dictionary<string, object> { { "@UserId", userId }, { "@TargetUserId", targetUserId }, { "@Rating", rating } };
+
+                await _db.SaveData(sql, parameters);
+            }
+            else
+            {
+                sql = "UPDATE users_behavior SET rating = @Rating WHERE user_id = @UserId AND target_user_id = @TargetUserId";
+                parameters = new Dictionary<string, object> { { "@UserId", userId }, { "@TargetUserId", targetUserId }, { "@Rating", rating } };
+
+                await _db.UpdateData(sql, parameters);
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ namespace API.DataAccess.Repositories
     {
         Task<List<Question>> GetQuestions();
         Task SaveAnswer(List<AnswerDto> answers, int userId);
+        Task<bool> CheckIfUserAnsweredToQuestions(int userId);
     }
 
     public class QuestionRepository : IQuestionRepository
@@ -68,6 +69,24 @@ namespace API.DataAccess.Repositories
 
                 await _db.UpdateData(sql, parameters);
             };
+        }
+
+        public async Task<bool> CheckIfUserAnsweredToQuestions(int userId)
+        {
+            var sql = "SELECT user_id FROM users_matching_info WHERE user_id = @UserId";
+
+            var parameters = new Dictionary<string, object> {
+                { "@UserId", userId }
+            };
+
+            var result = await _db.LoadData<int>(sql, parameters);
+
+            if (result.Count == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
