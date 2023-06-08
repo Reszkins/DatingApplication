@@ -31,67 +31,19 @@ namespace API.Controllers
         [HttpGet, Route("all")]
         public async Task<IActionResult> GetPhotos()
         {
-
             var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
             if (userId is null)
             {
                 return BadRequest("User does not exist.");
             }
-            string userFolderPath = Path.Combine("/app/Photos/", userId.Value.ToString());
 
-            if (!Directory.Exists(userFolderPath))
-            {
-                return NotFound("User folder does not exist.");
-            }
-
-            string[] photoFiles = Directory.GetFiles(userFolderPath, "*.txt");
-            if (photoFiles.Length == 0)
-            {
-                return NotFound("No photo files found.");
-            }
-
-            string firstPhotoFile = photoFiles[0];
-            string fileName = Path.GetFileNameWithoutExtension(firstPhotoFile); // Remove the file extension
-
-
-            // Read the base64-encoded image from the text file
-            string base64Image = await System.IO.File.ReadAllTextAsync(firstPhotoFile);
-            Console.Write(base64Image + "\n");
-            // Remove the prefix if present
-            if (base64Image.StartsWith("data:image/jpeg;base64,"))
-            {
-                base64Image = base64Image.Substring("data:image/jpeg;base64,".Length);
-            }
-
-            // Decode the base64 image to bytes
-            // Create a JSON object with the base64 image
-            var photoJson = new { photo = base64Image };
-
-            return Ok(photoJson);
-            // Save the bytes to a file
-            //string tempFilePath = Path.GetTempFileName();
-            //await System.IO.File.WriteAllBytesAsync(tempFilePath, imageBytes);
-
-            // Create a FileStreamResult from the file path
-            // FileStreamResult fileStreamResult = new FileStreamResult(new FileStream(tempFilePath, FileMode.Open, FileAccess.Read), "image/jpeg");
-            //fileStreamResult.FileDownloadName = fileName;
-
-            // return fileStreamResult;
+            return await GetPhotosByUserId(userId.Value.ToString());
         }
 
         [HttpGet, Route("all/{userId}")]
         public async Task<IActionResult> GetPhotos(int userId)
         {
-            string userFolderPath = Path.Combine("/app/Photos/", userId.ToString());
-
-            if (!Directory.Exists(userFolderPath))
-            {
-                return NotFound("User folder does not exist.");
-            }
-
-            string[] photoFiles = Directory.GetFiles(userFolderPath);
-
-            return Ok(photoFiles);
+            return await GetPhotosByUserId(userId.ToString());
         }
 
         [HttpPost("upload")]
@@ -117,10 +69,33 @@ namespace API.Controllers
             return BadRequest("No photo file found in the request.");
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeletePhoto()
+        private async Task<IActionResult> GetPhotosByUserId(String userId)
         {
-            throw new NotImplementedException();
+            string userFolderPath = Path.Combine("/app/Photos/", userId);
+
+            if (!Directory.Exists(userFolderPath))
+            {
+                return NotFound("User folder does not exist.");
+            }
+
+            string[] photoFiles = Directory.GetFiles(userFolderPath, "*.txt");
+            if (photoFiles.Length == 0)
+            {
+                return NotFound("No photo files found.");
+            }
+
+            string firstPhotoFile = photoFiles[0];
+            string fileName = Path.GetFileNameWithoutExtension(firstPhotoFile);
+            string base64Image = await System.IO.File.ReadAllTextAsync(firstPhotoFile);
+
+            if (base64Image.StartsWith("data:image/jpeg;base64,"))
+            {
+                base64Image = base64Image.Substring("data:image/jpeg;base64,".Length);
+            }
+
+            var photoJson = new { photo = base64Image };
+
+            return Ok(photoJson);
         }
     }
 }
