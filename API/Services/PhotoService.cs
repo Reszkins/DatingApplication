@@ -41,7 +41,7 @@ namespace API.Services
             //  {
             //      await photoStream.CopyToAsync(fileStream);
             // }
-            string fileName = $"{Guid.NewGuid()}.txt";
+            string fileName = "photo.txt";
             string filePath = Path.Combine(userFolder, fileName);
 
             using (StreamReader reader = new StreamReader(photoStream))
