@@ -11,6 +11,8 @@ namespace API.DataAccess.Repositories
         Task SetUserDescription(int userId, string description);
         Task DeleteUserDescription(int userId);
         Task SetUserRating(int userId, int targetUserId, int rating);
+        Task<int?> GetUserRating(int userId, int targetUserId);
+        Task<double?> GetUserRatingFromAll(int targetUserId);
     }
 
     public class UserRepository : IUserRepository
@@ -98,6 +100,36 @@ namespace API.DataAccess.Repositories
 
                 await _db.UpdateData(sql, parameters);
             }
+        }
+
+        public async Task<int?> GetUserRating(int userId, int targetUserId)
+        {
+            var sql = "SELECT rating FROM users_behavior WHERE user_id = @UserId AND target_user_id = @TargetUserId";
+            var parameters = new Dictionary<string, object> { { "@UserId", userId }, { "@TargetUserId", targetUserId } };
+
+            var result = await _db.LoadData<int>(sql, parameters);
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<double?> GetUserRatingFromAll(int targetUserId)
+        {
+            var sql = "SELECT rating FROM users_behavior WHERE target_user_id = @TargetUserId";
+            var parameters = new Dictionary<string, object> { { "@TargetUserId", targetUserId } };
+
+            var result = await _db.LoadData<int>(sql, parameters);
+
+            if (result is null) return null;
+
+            var count = result.Count;
+            var sum = 0;
+
+            foreach(var rating in result)
+            {
+                sum += rating;
+            }
+
+            return sum/count;
         }
     }
 }

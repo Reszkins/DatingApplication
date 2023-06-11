@@ -28,5 +28,29 @@ namespace API.Controllers
 
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRatingFromUser(int targetUserId)
+        {
+            var userId = await _userRepository.GetUserId(User.FindFirstValue("userName"));
+
+            if (userId is null) return BadRequest("No such user");
+
+            var rating = await _userRepository.GetUserRating(userId.Value, targetUserId);
+            
+            if (rating is null) return BadRequest("No rating");
+
+            return Ok(rating);
+        }
+
+        [HttpGet("fromall")]
+        public async Task<IActionResult> GetRatingFromAllUsers(int targetUserId)
+        {
+            var rating = await _userRepository.GetUserRatingFromAll(targetUserId);
+
+            if (rating is null) return BadRequest("No rating");
+
+            return Ok(rating);
+        }
     }
 }

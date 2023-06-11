@@ -62,6 +62,7 @@ namespace API.Controllers
                 FirstName = credentials.FirstName,
                 SecondName = credentials.SecondName,
                 Gender = credentials.Gender,
+                Sexuality = credentials.Sexuality,
                 DateOfBirth = credentials.DateOfBirth
             };
 
