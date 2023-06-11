@@ -49,11 +49,12 @@ namespace API.DataAccess.Repositories
 
             var userInfo = GetUser(newAccount.Email);
 
-            sql = "INSERT INTO users_base_info (user_id, first_name, second_name, gender, date_of_birth, description) VALUES (@UserId, @FirstName, @SecondName, @Gender, @DateOfBirth, null)";
+            sql = "INSERT INTO users_base_info (user_id, first_name, second_name, gender, sexuality, date_of_birth, description) VALUES (@UserId, @FirstName, @SecondName, @Gender, @Sexuality, @DateOfBirth, null)";
             parameters = new Dictionary<string, object> {
                 { "@UserId", userInfo.Id },
                 { "@FirstName", newAccountBaseInfo.FirstName },
                 { "@SecondName", newAccountBaseInfo.SecondName },
+                { "@Sexuality", newAccountBaseInfo.Sexuality },
                 { "@Gender", newAccountBaseInfo.Gender },
                 { "@DateOfBirth", newAccountBaseInfo.DateOfBirth }
             };
